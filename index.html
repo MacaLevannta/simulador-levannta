@@ -219,12 +219,7 @@
     /* ─── Slider ─────────────────────────────────────────────── */
     .lv-slider-track-wrap { position: relative; margin-bottom: 4px; }
     #sliderFill {
-      position: absolute;
-      top: 0; left: 0;
-      height: 6px;
-      border-radius: var(--radius-full);
-      background: linear-gradient(90deg, var(--color-accent-light), var(--color-accent));
-      pointer-events: none;
+      display: none;
     }
     .lv-slider {
       -webkit-appearance: none;
@@ -232,7 +227,7 @@
       width: 100%;
       height: 6px;
       border-radius: var(--radius-full);
-      background: var(--color-neutral-200);
+      background: linear-gradient(to right, var(--color-accent-light), var(--color-accent));
       outline: none;
       cursor: pointer;
     }
@@ -553,7 +548,7 @@
                 <span class="val">1,5%</span>
               </div>
               <div class="lv-summary-row">
-                <span class="key">Gastos por servicio (1%)</span>
+                <span class="key">Gastos por servicio</span>
                 <span class="val" id="summaryGastos">$200.000</span>
               </div>
               <div class="lv-summary-row">
@@ -571,7 +566,6 @@
               <span>
                 Los valores son referenciales. Un ejecutivo de Levannta revisará
                 tu solicitud y confirmará las condiciones finales antes de transferir los fondos.
-                Levannta no se pone en contacto con tu cliente con el que tienes el contrato.
               </span>
             </div>
           </div>
