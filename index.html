@@ -724,14 +724,11 @@
   let   baseMax      = 80000000;   // max from pre-screen selection
   let   selectedMax  = 80000000;   // effective max (adjusts with cuotas)
 
-  /* ─── Quick-amount presets per max ──────────────────────── */
-  const PRESETS = {
-    10000000:  [2000000, 4000000, 7000000, 10000000],
-    30000000:  [5000000, 10000000, 20000000, 30000000],
-    100000000: [20000000, 40000000, 60000000, 100000000],
-    80000000:  [20000000, 40000000, 60000000, 80000000],
-    300000000: [50000000, 100000000, 200000000, 300000000],
-  };
+  /* ─── Generate quick-amount presets dynamically from selectedMax ── */
+  function getPresets() {
+    const step = selectedMax / 4;
+    return [1, 2, 3, 4].map(i => Math.floor(i * step / 500000) * 500000);
+  }
 
   /* ─── Format CLP ─────────────────────────────────────────── */
   function fmtCLP(n) {
@@ -823,7 +820,7 @@
 
   /* ─── Build quick-amount buttons ─────────────────────────── */
   function buildQuickButtons() {
-    const presets = PRESETS[selectedMax] || PRESETS[80000000];
+    const presets = getPresets();
     const wrap    = document.getElementById('quickAmounts');
     wrap.innerHTML = '';
     presets.forEach(p => {
@@ -885,7 +882,7 @@
   }
 
   function syncQuickButtons() {
-    const presets = PRESETS[selectedMax] || PRESETS[80000000];
+    const presets = getPresets();
     document.querySelectorAll('.lv-quick-btn').forEach((btn, i) => {
       btn.classList.toggle('active', rawAmount === presets[i]);
     });
