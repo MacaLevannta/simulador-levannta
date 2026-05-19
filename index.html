@@ -609,7 +609,7 @@
             <div class="lv-summary">
               <div class="lv-select-row">
                 <span class="lv-select-label">Cantidad de cuotas</span>
-                <select id="selectCuotas" class="lv-select" onchange="updateSummary()">
+                <select id="selectCuotas" class="lv-select" onchange="updateMaxByCuotas()">
                   <option value="12">12 cuotas</option>
                   <option value="18">18 cuotas</option>
                   <option value="24">24 cuotas</option>
@@ -721,7 +721,8 @@
   const TASA      = 0.015;
   const GASTOS_PC = 0.01;
   let   rawAmount    = 20000000;
-  let   selectedMax  = 80000000;   // default, overridden on pre-screen
+  let   baseMax      = 80000000;   // max from pre-screen selection
+  let   selectedMax  = 80000000;   // effective max (adjusts with cuotas)
 
   /* ─── Quick-amount presets per max ──────────────────────── */
   const PRESETS = {
@@ -748,13 +749,51 @@
     document.getElementById('btnContinuar').classList.add('visible');
   }
 
+  /* ─── Effective max based on cuotas ─────────────────────── */
+  function getEffectiveMax(cuotas) {
+    if (cuotas === 24) return baseMax;
+    if (cuotas === 18) return Math.floor(baseMax * 0.85 / 500000) * 500000;
+    if (cuotas === 12) return Math.floor(baseMax * 0.80 / 500000) * 500000;
+    return baseMax;
+  }
+
+  /* ─── Update max when cuotas changes ────────────────────── */
+  function updateMaxByCuotas() {
+    const cuotas = parseInt(document.getElementById('selectCuotas').value);
+    selectedMax  = getEffectiveMax(cuotas);
+
+    /* Banner */
+    document.getElementById('bannerAmount').innerHTML = '<sup>$</sup>' + fmtCLP(selectedMax);
+
+    /* Slider */
+    const slider = document.getElementById('amountSlider');
+    slider.max   = selectedMax;
+    document.getElementById('sliderMaxLabel').textContent = '$' + fmtCLP(selectedMax);
+
+    /* Clamp current amount if it exceeds new max */
+    if (rawAmount > selectedMax) {
+      rawAmount = selectedMax;
+      slider.value = rawAmount;
+      document.getElementById('amountDisplay').value = fmtCLP(rawAmount);
+    }
+
+    /* Rebuild quick buttons */
+    buildQuickButtons();
+
+    /* Recalc summary */
+    updateSummary();
+  }
+
   /* ─── Pre-screen: go to main ─────────────────────────────── */
   function goToMain() {
     const selected = document.querySelector('.lv-option.selected');
     if (!selected) return;
 
-    selectedMax = parseInt(selected.dataset.max);
-    const label = selected.dataset.label;
+    baseMax     = parseInt(selected.dataset.max);
+    selectedMax = baseMax;   // start at 24 cuotas (full max)
+
+    /* Force cuotas selector to 24 so it matches the full max */
+    document.getElementById('selectCuotas').value = '24';
 
     /* Update banner */
     document.getElementById('bannerAmount').innerHTML = '<sup>$</sup>' + fmtCLP(selectedMax);
