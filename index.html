@@ -583,7 +583,7 @@
         </div>
 
         <div class="lv-pre-cta">
-          <button id="btnContinuar" class="lv-btn-continuar" onclick="goToMain()">
+          <button id="btnContinuar" type="button" class="lv-btn-continuar" onclick="goToMain()">
             Continuar &nbsp;→
           </button>
         </div>
@@ -594,7 +594,7 @@
     <div id="screen-main">
 
       <div class="lv-back-bar">
-        <button class="lv-back-btn" onclick="goBack()">
+        <button class="lv-back-btn" type="button" onclick="goBack()">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -815,13 +815,13 @@
     updateSummary();
     document.getElementById('screen-pre').style.display  = 'none';
     document.getElementById('screen-main').style.display = 'block';
-    window.scrollTo(0, 0);
+    document.querySelector('.lv-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function goBack() {
     document.getElementById('screen-main').style.display = 'none';
     document.getElementById('screen-pre').style.display  = 'block';
-    window.scrollTo(0, 0);
+    document.querySelector('.lv-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   /* ── Resumen ── */

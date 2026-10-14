@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Adelanto de Capital – Levannta</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Design Tokens ──────────────────────────────────────── */
+    :root {
+      --color-brand:        #0A2463;
+      --color-brand-mid:    #1A3C8F;
+      --color-accent:       #3D9BE9;
+      --color-accent-light: #E8F3FD;
+      --color-success:      #15803D;
+      --color-success-bg:   #DCFCE7;
+      --color-warning:      #B45309;
+      --color-warning-bg:   #FEF3C7;
+      --color-neutral-50:   #F8FAFC;
+      --color-neutral-100:  #F1F5F9;
+      --color-neutral-200:  #E2E8F0;
+      --color-neutral-300:  #CBD5E1;
+      --color-neutral-400:  #94A3B8;
+      --color-neutral-500:  #64748B;
+      --color-neutral-600:  #475569;
+      --color-neutral-800:  #1E293B;
+      --color-white:        #FFFFFF;
+
+      --radius-sm:   6px;
+      --radius-md:   10px;
+      --radius-lg:   16px;
+      --radius-xl:   24px;
+      --radius-full: 9999px;
+
+      --shadow-lg:    0 8px 32px rgba(0,0,0,.12);
+      --shadow-focus: 0 0 0 3px rgba(61,155,233,.25);
+
+      --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-xs:   12px;
+      --font-sm:   13px;
+      --font-base: 14px;
+      --font-md:   16px;
+      --font-lg:   18px;
+      --font-xl:   22px;
+      --font-2xl:  28px;
+
+      --transition: 160ms ease;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-family);
+      background: var(--color-neutral-50);
+      color: var(--color-neutral-800);
+      font-size: var(--font-base);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Wrapper & Panel ────────────────────────────────────── */
+    .lv-wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 16px 60px;
+    }
+    .lv-panel {
+      width: 100%;
+      max-width: 1080px;
+      background: var(--color-white);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+
+    /* ─── Header ─────────────────────────────────────────────── */
+    .lv-header {
+      background: linear-gradient(135deg, var(--color-brand) 0%, var(--color-brand-mid) 100%);
+      padding: 28px 36px 24px;
+      color: var(--color-white);
+      position: relative;
+      overflow: hidden;
+    }
+    .lv-header::after {
+      content: '';
+      position: absolute;
+      right: -40px; top: -40px;
+      width: 220px; height: 220px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.05);
+    }
+    .lv-header-label { font-size: var(--font-xs); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; opacity: .65; margin-bottom: 6px; }
+    .lv-header-title  { font-size: var(--font-xl); font-weight: 700; line-height: 1.2; }
+    .lv-header-sub    { margin-top: 6px; font-size: var(--font-sm); opacity: .7; }
+
+    /* ══════════════════════════════════════════════════════════
+       PRE-SCREEN
+    ══════════════════════════════════════════════════════════ */
+    #screen-pre  { display: block; }
+    #screen-main { display: none; }
+
+    .lv-pre-body {
+      padding: 40px 36px 36px;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+    .lv-pre-question {
+      font-size: var(--font-lg);
+      font-weight: 700;
+      color: var(--color-brand);
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    .lv-pre-sub {
+      font-size: var(--font-sm);
+      color: var(--color-neutral-500);
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .lv-options { display: flex; flex-direction: column; gap: 10px; }
+
+    .lv-option {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 20px;
+      border: 2px solid var(--color-neutral-200);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .lv-option:hover   { border-color: var(--color-accent); background: var(--color-accent-light); }
+    .lv-option.selected { border-color: var(--color-accent); background: var(--color-accent-light); box-shadow: var(--shadow-focus); }
+
+    .lv-radio {
+      width: 22px; height: 22px; min-width: 22px;
+      border: 2px solid var(--color-neutral-300);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--color-white);
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .lv-option.selected .lv-radio { border-color: var(--color-accent); background: var(--color-accent); }
+    .lv-radio-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-white); opacity: 0; transition: opacity var(--transition); }
+    .lv-option.selected .lv-radio-dot { opacity: 1; }
+
+    .lv-option-label { font-size: var(--font-md); font-weight: 600; color: var(--color-neutral-800); }
+    .lv-option.selected .lv-option-label { color: var(--color-brand); }
+
+    .lv-pre-cta { margin-top: 28px; display: flex; justify-content: center; }
+    .lv-btn-continuar {
+      font-family: var(--font-family);
+      font-size: var(--font-md);
+      font-weight: 600;
+      padding: 14px 48px;
+      border-radius: var(--radius-full);
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--color-accent) 0%, #1A77D4 100%);
+      color: var(--color-white);
+      box-shadow: 0 4px 16px rgba(61,155,233,.35);
+      transition: all var(--transition);
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .lv-btn-continuar.visible { display: inline-flex; }
+    .lv-btn-continuar:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(61,155,233,.45); }
+
+    /* ══════════════════════════════════════════════════════════
+       MAIN PANEL — Back bar
+    ══════════════════════════════════════════════════════════ */
+    .lv-back-bar { padding: 16px 28px 0; }
+    .lv-back-btn {
+      font-family: var(--font-family);
+      font-size: var(--font-sm);
+      font-weight: 600;
+      color: #B45309;
+      background: #FFF7ED;
+      border: 1.5px solid #FED7AA;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 16px 7px 12px;
+      border-radius: var(--radius-full);
+      transition: background var(--transition), box-shadow var(--transition);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .lv-back-btn:hover { background: #FEF3C7; box-shadow: 0 2px 8px rgba(180,83,9,.15); }
+    .lv-back-btn svg { flex-shrink: 0; }
+
+    /* ══════════════════════════════════════════════════════════
+       MAIN PANEL — Three-area grid
+    ══════════════════════════════════════════════════════════ */
+    .lv-body {
+      display: grid;
+      grid-template-columns: 2fr 3fr;
+      grid-template-rows: auto 1fr;
+      grid-template-areas:
+        "step1 step2"
+        "step3 step2";
+    }
+
+    .lv-step1 {
+      grid-area: step1;
+      padding: 28px 24px 20px 28px;
+      border-right: 1px solid var(--color-neutral-200);
+    }
+    .lv-step2 {
+      grid-area: step2;
+      padding: 28px 28px 28px 24px;
+    }
+    .lv-step3 {
+      grid-area: step3;
+      padding: 20px 24px 28px 28px;
+      border-right: 1px solid var(--color-neutral-200);
+      border-top: 1px solid var(--color-neutral-200);
+    }
+
+    /* ─── Section title ──────────────────────────────────────── */
+    .lv-section-title {
+      font-size: var(--font-xs);
+      font-weight: 700;
+      color: var(--color-neutral-500);
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    /* ─── Capital banner ─────────────────────────────────────── */
+    .lv-capital-banner {
+      background: linear-gradient(135deg, var(--color-accent-light) 0%, #dbeeff 100%);
+      border: 1px solid rgba(61,155,233,.2);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .lv-capital-info .label { font-size: var(--font-xs); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--color-accent); margin-bottom: 3px; }
+    .lv-capital-amount { font-size: 22px; font-weight: 700; color: var(--color-brand); line-height: 1; }
+    .lv-capital-amount sup { font-size: var(--font-sm); font-weight: 600; vertical-align: super; line-height: 0; }
+    .lv-capital-sub { font-size: var(--font-xs); color: var(--color-neutral-500); margin-top: 3px; }
+    .lv-capital-pill {
+      background: var(--color-success-bg);
+      color: var(--color-success);
+      font-size: var(--font-xs);
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      white-space: nowrap;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .lv-capital-pill::before { content: '✦'; font-size: 8px; }
+
+    /* ─── Amount display ─────────────────────────────────────── */
+    .lv-amount-display {
+      background: var(--color-neutral-50);
+      border: 1.5px solid var(--color-neutral-200);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .lv-amount-display label { font-size: var(--font-sm); color: var(--color-neutral-500); font-weight: 500; white-space: nowrap; }
+    .lv-amount-input-wrap { display: flex; align-items: center; gap: 4px; min-width: 0; }
+    .lv-currency { font-size: var(--font-md); font-weight: 700; color: var(--color-neutral-400); flex-shrink: 0; }
+    .lv-amount-input {
+      font-family: var(--font-family);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--color-brand);
+      border: none;
+      background: transparent;
+      outline: none;
+      text-align: right;
+      width: 150px;
+      min-width: 0;
+    }
+
+    /* ─── Slider ─────────────────────────────────────────────── */
+    .lv-slider-track-wrap { position: relative; margin-bottom: 4px; }
+    .lv-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: var(--radius-full);
+      background: linear-gradient(to right, var(--color-accent-light), var(--color-accent));
+      outline: none;
+      cursor: pointer;
+    }
+    .lv-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      box-shadow: 0 2px 8px rgba(61,155,233,.4);
+      border: 3px solid var(--color-white);
+      cursor: pointer;
+      transition: transform var(--transition);
+    }
+    .lv-slider::-webkit-slider-thumb:hover { transform: scale(1.1); }
+    .lv-slider::-moz-range-thumb {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      border: 3px solid var(--color-white);
+      cursor: pointer;
+    }
+    .lv-slider-labels { display: flex; justify-content: space-between; margin-top: 8px; font-size: var(--font-xs); color: var(--color-neutral-400); font-weight: 500; }
+
+    /* ─── Quick buttons ──────────────────────────────────────── */
+    .lv-quick-amounts { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+    .lv-quick-btn {
+      font-family: var(--font-family);
+      font-size: var(--font-xs);
+      font-weight: 600;
+      padding: 8px 14px;
+      border: 1.5px solid var(--color-neutral-200);
+      border-radius: var(--radius-full);
+      background: var(--color-white);
+      color: var(--color-neutral-600);
+      cursor: pointer;
+      transition: all var(--transition);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .lv-quick-btn:hover, .lv-quick-btn.active {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+      background: var(--color-accent-light);
+    }
+
+    /* ─── Contract list ──────────────────────────────────────── */
+    .lv-contract-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border: 1.5px solid var(--color-neutral-200);
+      border-radius: var(--radius-md);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .lv-contract-item:last-child { margin-bottom: 0; }
+    .lv-contract-item:hover     { border-color: var(--color-accent); background: var(--color-accent-light); }
+    .lv-contract-item.selected  { border-color: var(--color-accent); background: var(--color-accent-light); box-shadow: var(--shadow-focus); }
+    .lv-checkbox-box {
+      width: 20px; height: 20px; min-width: 20px;
+      border: 2px solid var(--color-neutral-300);
+      border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--color-white);
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .lv-contract-item.selected .lv-checkbox-box { background: var(--color-accent); border-color: var(--color-accent); }
+    .lv-checkbox-box svg { display: none; }
+    .lv-contract-item.selected .lv-checkbox-box svg { display: block; }
+
+    .lv-contract-info { flex: 1; min-width: 0; }
+    .lv-contract-name { font-size: var(--font-base); font-weight: 600; color: var(--color-neutral-800); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lv-contract-meta { font-size: var(--font-xs); color: var(--color-neutral-500); margin-top: 2px; display: flex; gap: 6px; flex-wrap: wrap; }
+    .lv-contract-meta .dot { color: var(--color-neutral-300); }
+    .lv-badge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: var(--radius-full); flex-shrink: 0; }
+    .lv-badge--active  { background: var(--color-success-bg); color: var(--color-success); }
+    .lv-contract-amount { text-align: right; flex-shrink: 0; }
+    .lv-contract-amount .val { font-size: var(--font-md); font-weight: 700; color: var(--color-brand); }
+    .lv-contract-amount .sub { font-size: var(--font-xs); color: var(--color-neutral-400); }
+
+    /* ─── Summary box ────────────────────────────────────────── */
+    .lv-summary { background: var(--color-neutral-50); border: 1.5px solid var(--color-neutral-200); border-radius: var(--radius-md); padding: 0; margin-bottom: 20px; overflow: hidden; }
+    .lv-select-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 18px; gap: 12px; border-bottom: 1px solid var(--color-neutral-200); }
+    .lv-select-label { font-size: var(--font-sm); font-weight: 500; color: var(--color-neutral-600); }
+    .lv-select {
+      font-family: var(--font-family);
+      font-size: var(--font-sm);
+      font-weight: 600;
+      color: var(--color-brand);
+      background: var(--color-white);
+      border: 1.5px solid var(--color-neutral-200);
+      border-radius: var(--radius-sm);
+      padding: 6px 28px 6px 10px;
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1L6 7L11 1' stroke='%2394A3B8' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      outline: none;
+      transition: border-color var(--transition);
+      flex-shrink: 0;
+    }
+    .lv-select:focus, .lv-select:hover { border-color: var(--color-accent); }
+
+    .lv-summary-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 18px; font-size: var(--font-sm); border-bottom: 1px solid var(--color-neutral-200); gap: 8px; }
+    .lv-summary-row:last-child { border-bottom: none; }
+    .lv-summary-row .key { color: var(--color-neutral-500); }
+    .lv-summary-row .val { font-weight: 600; color: var(--color-neutral-800); flex-shrink: 0; }
+    .lv-summary-row.total { background: var(--color-accent-light); border-top: 1.5px solid rgba(61,155,233,.2); }
+    .lv-summary-row.total .key { font-weight: 700; font-size: var(--font-base); color: var(--color-brand); }
+    .lv-summary-row.total .val { font-size: var(--font-lg); font-weight: 700; color: var(--color-brand); }
+
+    /* ─── Info callout ───────────────────────────────────────── */
+    .lv-info { background: #FFF7ED; border: 1px solid #FED7AA; border-radius: var(--radius-md); padding: 12px 16px; font-size: var(--font-sm); color: var(--color-warning); display: flex; gap: 10px; align-items: flex-start; }
+    .lv-info-icon { font-size: 15px; flex-shrink: 0; line-height: 1.5; }
+
+    /* ─── Footer ─────────────────────────────────────────────── */
+    .lv-footer { border-top: 1px solid var(--color-neutral-200); padding: 20px 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .lv-footer-note { font-size: var(--font-xs); color: var(--color-neutral-400); max-width: 400px; line-height: 1.6; }
+    .lv-footer-note strong { color: var(--color-neutral-600); }
+    .lv-btn {
+      font-family: var(--font-family);
+      font-size: var(--font-base);
+      font-weight: 600;
+      padding: 13px 28px;
+      border-radius: var(--radius-full);
+      border: none;
+      cursor: pointer;
+      transition: all var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      line-height: 1;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .lv-btn--primary { background: linear-gradient(135deg, var(--color-accent) 0%, #1A77D4 100%); color: var(--color-white); box-shadow: 0 4px 16px rgba(61,155,233,.35); }
+    .lv-btn--primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(61,155,233,.45); }
+
+    /* ══════════════════════════════════════════════════════════
+       RESPONSIVE — Tablet  ≤ 860px
+    ══════════════════════════════════════════════════════════ */
+    @media (max-width: 860px) {
+      .lv-wrapper { padding: 20px 12px 40px; }
+      .lv-panel { border-radius: var(--radius-lg); }
+      .lv-back-bar { padding: 14px 20px 0; }
+      .lv-step1 { padding: 20px 18px 16px 20px; }
+      .lv-step2 { padding: 20px 20px 20px 18px; }
+      .lv-step3 { padding: 16px 18px 20px 20px; }
+      .lv-amount-input { font-size: 18px; width: 130px; }
+      .lv-capital-amount { font-size: 18px; }
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       RESPONSIVE — Mobile  ≤ 640px
+    ══════════════════════════════════════════════════════════ */
+    @media (max-width: 640px) {
+      /* Panel */
+      .lv-wrapper { padding: 0 0 40px; align-items: flex-start; }
+      .lv-panel { border-radius: 0 0 var(--radius-xl) var(--radius-xl); box-shadow: none; }
+
+      /* Header */
+      .lv-header { padding: 20px 20px 18px; }
+      .lv-header-title { font-size: var(--font-lg); }
+      .lv-header-sub { font-size: var(--font-xs); }
+
+      /* Back button */
+      .lv-back-bar { padding: 14px 16px 0; }
+
+      /* Pre-screen */
+      .lv-pre-body { padding: 24px 16px 28px; }
+      .lv-pre-question { font-size: var(--font-md); }
+      .lv-option { padding: 14px 16px; }
+      .lv-option-label { font-size: var(--font-base); }
+      .lv-btn-continuar { width: 100%; justify-content: center; padding: 14px 24px; }
+      .lv-pre-cta { display: flex; }
+
+      /* Grid → single column in order: step1, step2, step3 */
+      .lv-body {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        grid-template-areas:
+          "step1"
+          "step2"
+          "step3";
+      }
+      .lv-step1 {
+        padding: 20px 16px 16px;
+        border-right: none;
+        border-bottom: 1px solid var(--color-neutral-200);
+      }
+      .lv-step2 {
+        padding: 20px 16px;
+        border-top: none;
+      }
+      .lv-step3 {
+        padding: 16px 16px 20px;
+        border-right: none;
+        border-top: 1px solid var(--color-neutral-200);
+      }
+
+      /* Amount input */
+      .lv-amount-display { padding: 12px 14px; }
+      .lv-amount-display label { font-size: var(--font-xs); }
+      .lv-amount-input { font-size: 20px; width: 100%; }
+
+      /* Capital banner */
+      .lv-capital-banner { flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px 16px; }
+      .lv-capital-amount { font-size: 20px; }
+
+      /* Quick buttons — equal width, 2 per row */
+      .lv-quick-amounts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .lv-quick-btn { text-align: center; padding: 10px 8px; font-size: var(--font-xs); }
+
+      /* Contracts */
+      .lv-contract-item { padding: 12px 14px; gap: 10px; }
+      .lv-contract-name { font-size: var(--font-sm); }
+      .lv-badge { display: none; }                    /* hide badge on tiny screens */
+      .lv-contract-amount .val { font-size: var(--font-base); }
+
+      /* Summary */
+      .lv-select-row { padding: 12px 14px; flex-wrap: wrap; gap: 8px; }
+      .lv-select { width: 100%; }
+      .lv-summary-row { padding: 10px 14px; }
+      .lv-summary-row.total .val { font-size: var(--font-base); }
+
+      /* Footer */
+      .lv-footer { padding: 16px; flex-direction: column; align-items: stretch; gap: 12px; }
+      .lv-footer-note { max-width: none; font-size: var(--font-xs); }
+      .lv-btn--primary { justify-content: center; width: 100%; padding: 15px; font-size: var(--font-md); }
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       RESPONSIVE — Extra small  ≤ 380px
+    ══════════════════════════════════════════════════════════ */
+    @media (max-width: 380px) {
+      .lv-amount-input { font-size: 17px; }
+      .lv-slider-labels { font-size: 10px; }
+      .lv-pre-question { font-size: var(--font-base); }
+    }
+  </style>
+</head>
+<body>
+<div class="lv-wrapper">
+  <div class="lv-panel">
+
+    <!-- Shared header -->
+    <div class="lv-header">
+      <div class="lv-header-label">Financiamiento &nbsp;/&nbsp; Capital de trabajo</div>
+      <div class="lv-header-title">Adelanto de Capital</div>
+      <div class="lv-header-sub">Accede a liquidez inmediata usando tus contratos como respaldo</div>
+    </div>
+
+    <!-- ══ PRE-SCREEN ══════════════════════════════════════════ -->
+    <div id="screen-pre">
+      <div class="lv-pre-body">
+        <div class="lv-pre-question">¿Cuánto vende tu empresa mensualmente?</div>
+        <div class="lv-pre-sub">Selecciona el rango que mejor representa tu facturación</div>
+
+        <div class="lv-options">
+          <div class="lv-option" data-max="20000000" onclick="selectRange(this)">
+            <div class="lv-radio"><div class="lv-radio-dot"></div></div>
+            <div class="lv-option-label">20 Millones CLP</div>
+          </div>
+          <div class="lv-option" data-max="50000000" onclick="selectRange(this)">
+            <div class="lv-radio"><div class="lv-radio-dot"></div></div>
+            <div class="lv-option-label">20 a 50 Millones CLP</div>
+          </div>
+          <div class="lv-option" data-max="100000000" onclick="selectRange(this)">
+            <div class="lv-radio"><div class="lv-radio-dot"></div></div>
+            <div class="lv-option-label">50 a 100 Millones CLP</div>
+          </div>
+          <div class="lv-option" data-max="300000000" onclick="selectRange(this)">
+            <div class="lv-radio"><div class="lv-radio-dot"></div></div>
+            <div class="lv-option-label">Sobre 100 Millones CLP</div>
+          </div>
+        </div>
+
+        <div class="lv-pre-cta">
+          <button id="btnContinuar" type="button" class="lv-btn-continuar" onclick="goToMain()">
+            Continuar &nbsp;→
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MAIN PANEL ══════════════════════════════════════════ -->
+    <div id="screen-main">
+
+      <div class="lv-back-bar">
+        <button class="lv-back-btn" type="button" onclick="goBack()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Modificar rango de facturación
+        </button>
+      </div>
+
+      <div class="lv-body">
+
+        <!-- PASO 1 -->
+        <div class="lv-step1">
+          <div class="lv-section-title">1 &nbsp;— Monto a adelantar</div>
+
+          <div class="lv-capital-banner">
+            <div class="lv-capital-info">
+              <div class="label">Total disponible</div>
+              <div class="lv-capital-amount" id="bannerAmount"><sup>$</sup>80.000.000</div>
+              <div class="lv-capital-sub">Basado en 3 contratos activos</div>
+            </div>
+            <div class="lv-capital-pill">Aprobado</div>
+          </div>
+
+          <div class="lv-amount-display">
+            <label>Monto solicitado</label>
+            <div class="lv-amount-input-wrap">
+              <span class="lv-currency">$</span>
+              <input id="amountDisplay" class="lv-amount-input" type="text" inputmode="numeric"
+                     value="20.000.000" oninput="syncFromText()" onblur="formatOnBlur()" />
+            </div>
+          </div>
+
+          <div class="lv-slider-track-wrap">
+            <input id="amountSlider" class="lv-slider" type="range"
+                   min="1000000" max="80000000" step="500000" value="20000000"
+                   oninput="syncFromSlider()" />
+          </div>
+          <div class="lv-slider-labels">
+            <span>$1.000.000</span>
+            <span id="sliderMaxLabel">$80.000.000</span>
+          </div>
+
+          <div class="lv-quick-amounts" id="quickAmounts"></div>
+        </div>
+
+        <!-- PASO 2 -->
+        <div class="lv-step2">
+          <div class="lv-section-title">2 &nbsp;— Selecciona los contratos que cubren el monto solicitado</div>
+
+          <div class="lv-contract-item selected" onclick="toggleContract(this)">
+            <div class="lv-checkbox-box">
+              <svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 4L4 7L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="lv-contract-info">
+              <div class="lv-contract-name">Constructora Arauco S.A.</div>
+              <div class="lv-contract-meta">
+                <span>Contrato #CA-2024-0082</span><span class="dot">·</span><span>Vence 15 Ago 2026</span>
+              </div>
+            </div>
+            <span class="lv-badge lv-badge--active">Activo</span>
+            <div class="lv-contract-amount"><div class="val">$30.000.000</div><div class="sub">disponible</div></div>
+          </div>
+
+          <div class="lv-contract-item selected" onclick="toggleContract(this)">
+            <div class="lv-checkbox-box">
+              <svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 4L4 7L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="lv-contract-info">
+              <div class="lv-contract-name">Minera Collahuasi – Mantenimiento</div>
+              <div class="lv-contract-meta">
+                <span>Contrato #MC-2025-0017</span><span class="dot">·</span><span>Vence 30 Mar 2027</span>
+              </div>
+            </div>
+            <span class="lv-badge lv-badge--active">Activo</span>
+            <div class="lv-contract-amount"><div class="val">$32.000.000</div><div class="sub">disponible</div></div>
+          </div>
+
+          <div class="lv-contract-item selected" onclick="toggleContract(this)">
+            <div class="lv-checkbox-box">
+              <svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 4L4 7L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="lv-contract-info">
+              <div class="lv-contract-name">Proyecto Habitacional Egaña</div>
+              <div class="lv-contract-meta">
+                <span>Contrato #PH-2025-0041</span><span class="dot">·</span><span>Vence 10 Dic 2026</span>
+              </div>
+            </div>
+            <span class="lv-badge lv-badge--active">Activo</span>
+            <div class="lv-contract-amount"><div class="val">$18.000.000</div><div class="sub">disponible</div></div>
+          </div>
+        </div>
+
+        <!-- PASO 3 -->
+        <div class="lv-step3">
+          <div class="lv-section-title">3 &nbsp;— Resumen de la operación</div>
+
+          <div class="lv-summary">
+            <div class="lv-select-row">
+              <span class="lv-select-label">Cantidad de cuotas</span>
+              <select id="selectCuotas" class="lv-select" onchange="updateMaxByCuotas()">
+                <option value="12">12 cuotas</option>
+                <option value="18">18 cuotas</option>
+                <option value="24">24 cuotas</option>
+              </select>
+            </div>
+            <div class="lv-select-row">
+              <span class="lv-select-label">Día de pago</span>
+              <select id="selectDia" class="lv-select">
+                <option value="5">5 de cada mes</option>
+                <option value="ultimo">Último día de cada mes</option>
+              </select>
+            </div>
+            <div class="lv-summary-row">
+              <span class="key">Tasa de interés</span>
+              <span class="val">1,5%</span>
+            </div>
+            <div class="lv-summary-row">
+              <span class="key">Gastos por servicio</span>
+              <span class="val" id="summaryGastos">$200.000</span>
+            </div>
+            <div class="lv-summary-row">
+              <span class="key">Monto cuota</span>
+              <span class="val" id="summaryCuota">$1.783.333</span>
+            </div>
+            <div class="lv-summary-row total">
+              <span class="key">Monto total a pagar</span>
+              <span class="val" id="summaryTotal">$21.400.000</span>
+            </div>
+          </div>
+
+          <div class="lv-info">
+            <span class="lv-info-icon">ℹ️</span>
+            <span>Los valores son referenciales. Un ejecutivo de Levannta revisará tu solicitud y confirmará las condiciones finales antes de transferir los fondos.</span>
+          </div>
+        </div>
+
+      </div><!-- /lv-body -->
+
+      <!-- Footer -->
+      <div class="lv-footer">
+        <div class="lv-footer-note">
+          Al continuar aceptas los <strong>Términos y Condiciones</strong> de
+          Levannta. Operación sujeta a aprobación crediticia.
+        </div>
+        <a href="https://app.levannta.com/auth/register?utm_source=simulador" target="_blank" rel="noopener" class="lv-btn lv-btn--primary">
+          Solicitar adelanto &nbsp;→
+        </a>
+      </div>
+
+    </div><!-- /screen-main -->
+
+  </div><!-- /lv-panel -->
+</div><!-- /lv-wrapper -->
+
+<script>
+  const TASA      = 0.015;
+  const GASTOS_PC = 0.01;
+  let   rawAmount  = 20000000;
+  let   baseMax    = 80000000;
+  let   selectedMax= 80000000;
+
+  /* ── Presets dinámicos ── */
+  function getPresets() {
+    const step = selectedMax / 4;
+    return [1,2,3,4].map(i => Math.floor(i * step / 500000) * 500000);
+  }
+
+  /* ── Formato CLP ── */
+  function fmtCLP(n) { return Math.round(n).toLocaleString('es-CL'); }
+  function fmtShort(n) { return n >= 1000000 ? '$' + (n/1000000) + 'M' : '$' + fmtCLP(n); }
+
+  /* ── Max según cuotas ── */
+  function getEffectiveMax(cuotas) {
+    if (cuotas === 24) return baseMax;
+    if (cuotas === 18) return Math.floor(baseMax * 0.85 / 500000) * 500000;
+    if (cuotas === 12) return Math.floor(baseMax * 0.80 / 500000) * 500000;
+    return baseMax;
+  }
+
+  function updateMaxByCuotas() {
+    const cuotas = parseInt(document.getElementById('selectCuotas').value);
+    selectedMax  = getEffectiveMax(cuotas);
+    document.getElementById('bannerAmount').innerHTML = '<sup>$</sup>' + fmtCLP(selectedMax);
+    const slider = document.getElementById('amountSlider');
+    slider.max   = selectedMax;
+    document.getElementById('sliderMaxLabel').textContent = '$' + fmtCLP(selectedMax);
+    if (rawAmount > selectedMax) {
+      rawAmount    = selectedMax;
+      slider.value = rawAmount;
+      document.getElementById('amountDisplay').value = fmtCLP(rawAmount);
+    }
+    buildQuickButtons();
+    updateSummary();
+  }
+
+  /* ── Pre-screen ── */
+  function selectRange(el) {
+    document.querySelectorAll('.lv-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('btnContinuar').classList.add('visible');
+  }
+
+  function goToMain() {
+    const sel = document.querySelector('.lv-option.selected');
+    if (!sel) return;
+    baseMax     = parseInt(sel.dataset.max);
+    selectedMax = baseMax;
+    document.getElementById('selectCuotas').value = '24';
+    document.getElementById('bannerAmount').innerHTML = '<sup>$</sup>' + fmtCLP(selectedMax);
+    const slider = document.getElementById('amountSlider');
+    slider.max = selectedMax;
+    slider.min = 1000000;
+    rawAmount  = Math.max(1000000, Math.round(selectedMax * 0.25 / 500000) * 500000);
+    if (rawAmount > selectedMax) rawAmount = selectedMax;
+    slider.value = rawAmount;
+    document.getElementById('amountDisplay').value = fmtCLP(rawAmount);
+    document.getElementById('sliderMaxLabel').textContent = '$' + fmtCLP(selectedMax);
+    buildQuickButtons();
+    updateSummary();
+    document.getElementById('screen-pre').style.display  = 'none';
+    document.getElementById('screen-main').style.display = 'block';
+    document.querySelector('.lv-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function goBack() {
+    document.getElementById('screen-main').style.display = 'none';
+    document.getElementById('screen-pre').style.display  = 'block';
+    document.querySelector('.lv-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* ── Resumen ── */
+  function updateSummary() {
+    const cuotas = parseInt(document.getElementById('selectCuotas').value);
+    document.getElementById('summaryGastos').textContent = '$' + fmtCLP(rawAmount * GASTOS_PC);
+    document.getElementById('summaryCuota').textContent  = '$' + fmtCLP(rawAmount * (1 + TASA * cuotas) / cuotas);
+    document.getElementById('summaryTotal').textContent  = '$' + fmtCLP(rawAmount * (1 + TASA * cuotas));
+  }
+
+  /* ── Botones rápidos ── */
+  function buildQuickButtons() {
+    const presets = getPresets();
+    const wrap    = document.getElementById('quickAmounts');
+    wrap.innerHTML = '';
+    presets.forEach(p => {
+      const btn = document.createElement('button');
+      btn.className   = 'lv-quick-btn' + (p === rawAmount ? ' active' : '');
+      btn.textContent = fmtShort(p);
+      btn.onclick     = () => setAmount(p);
+      wrap.appendChild(btn);
+    });
+  }
+
+  function syncQuickButtons() {
+    const presets = getPresets();
+    document.querySelectorAll('.lv-quick-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', rawAmount === presets[i]);
+    });
+  }
+
+  /* ── Slider / Input sync ── */
+  function syncFromText() {
+    const input  = document.getElementById('amountDisplay');
+    const digits = input.value.replace(/\D/g, '');
+    let val = parseInt(digits) || 0;
+    if (val > selectedMax) val = selectedMax;
+    rawAmount   = val;
+    input.value = val > 0 ? fmtCLP(val) : '';
+    document.getElementById('amountSlider').value = val;
+    updateSummary();
+    syncQuickButtons();
+  }
+
+  function formatOnBlur() {
+    if (rawAmount < 1000000) {
+      rawAmount = 1000000;
+      document.getElementById('amountDisplay').value = fmtCLP(rawAmount);
+      document.getElementById('amountSlider').value  = rawAmount;
+      updateSummary(); syncQuickButtons();
+    }
+  }
+
+  function syncFromSlider() {
+    rawAmount = parseInt(document.getElementById('amountSlider').value);
+    document.getElementById('amountDisplay').value = fmtCLP(rawAmount);
+    updateSummary(); syncQuickButtons();
+  }
+
+  function setAmount(n) {
+    rawAmount = Math.min(n, selectedMax);
+    document.getElementById('amountDisplay').value = fmtCLP(rawAmount);
+    document.getElementById('amountSlider').value  = rawAmount;
+    updateSummary(); syncQuickButtons();
+  }
+
+  /* ── Toggle contrato ── */
+  function toggleContract(el) {
+    const sel = document.querySelectorAll('.lv-contract-item.selected');
+    if (el.classList.contains('selected') && sel.length === 1) return;
+    el.classList.toggle('selected');
+  }
+</script>
+</body>
+</html>
